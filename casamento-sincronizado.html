@@ -1,0 +1,929 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ana & Tiago — Painel do Casamento</title>
+<style>
+:root {
+  color-scheme: light;
+  --cream:#fdfaf4;--ivory:#f5f0e8;
+  --gold:#b8965a;--gold-light:#f7eed8;--gold-dark:#8a6d38;
+  --rose:#c08080;--rose-light:#f9edec;--rose-dark:#8a4f4f;
+  --sage:#7a9278;--sage-light:#eaf2ea;
+  --blue:#5a7a9e;--blue-light:#eaf0f8;
+  --text:#2e2218;--text-muted:#7a6850;--border:#e2d5bc;
+  --shadow:0 2px 16px rgba(184,150,90,.10);
+  --nav-h:58px;--green:#4caf50;--red:#e57373;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:Georgia,'Times New Roman',serif;background:var(--cream);color:var(--text);min-height:100vh;}
+
+/* SETUP */
+#screen-setup{max-width:480px;margin:0 auto;padding:0 16px 60px;display:none;}
+.setup-hero{text-align:center;padding:28px 0 22px;}
+.setup-mono{font-size:.76rem;letter-spacing:4px;color:var(--gold);text-transform:uppercase;margin-bottom:5px;}
+.setup-hero h1{font-size:1.55rem;font-weight:normal;}
+.setup-hero p{font-size:.83rem;color:var(--text-muted);margin-top:6px;line-height:1.55;}
+.setup-card{background:white;border-radius:14px;border:1px solid var(--border);box-shadow:var(--shadow);padding:18px;margin-bottom:12px;}
+.setup-card h2{font-size:.88rem;color:var(--gold-dark);margin-bottom:14px;font-weight:bold;font-family:sans-serif;}
+.step{display:flex;gap:12px;margin-bottom:13px;align-items:flex-start;}
+.step:last-child{margin-bottom:0;}
+.step-n{width:24px;height:24px;min-width:24px;border-radius:50%;background:var(--gold);color:white;display:flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:bold;font-family:sans-serif;flex-shrink:0;margin-top:1px;}
+.step p{font-size:.83rem;line-height:1.52;color:var(--text);}
+.step p strong{color:var(--gold-dark);}
+.step p code{background:var(--ivory);padding:1px 5px;border-radius:4px;font-size:.78rem;font-family:monospace;}
+.cfg-area{width:100%;min-height:128px;border:1.5px solid var(--border);border-radius:10px;padding:11px;font-size:.76rem;font-family:monospace;color:var(--text);background:var(--ivory);resize:vertical;outline:none;line-height:1.5;}
+.cfg-area:focus{border-color:var(--gold);}
+.btn-primary{display:block;width:100%;padding:13px;background:var(--gold);color:white;border:none;border-radius:10px;font-size:.93rem;font-family:inherit;cursor:pointer;margin-top:12px;transition:background .2s;letter-spacing:.3px;}
+.btn-primary:hover{background:var(--gold-dark);}
+.setup-err{color:var(--red);font-size:.78rem;margin-top:8px;font-family:sans-serif;line-height:1.4;}
+.skip-link{text-align:center;margin-top:14px;font-size:.77rem;color:var(--text-muted);}
+.skip-link a{color:var(--blue);cursor:pointer;text-decoration:underline;}
+
+/* MAIN */
+#screen-main{display:none;padding-bottom:16px;}
+
+/* header */
+.header{background:var(--ivory);border-bottom:2px solid var(--gold);text-align:center;padding:18px 20px 14px;position:relative;}
+.monogram{font-size:.75rem;letter-spacing:4px;color:var(--gold);text-transform:uppercase;margin-bottom:3px;}
+.header h1{font-size:1.5rem;font-weight:normal;}
+.header h1 span{color:var(--gold-dark);}
+.header .date-line{font-size:.78rem;color:var(--text-muted);margin-top:3px;font-style:italic;}
+.floral{font-size:.85rem;color:var(--gold);letter-spacing:5px;margin-top:5px;display:block;}
+.sync-pill{position:absolute;top:11px;right:11px;display:flex;align-items:center;gap:4px;font-size:.66rem;color:var(--text-muted);font-family:sans-serif;background:white;border:1px solid var(--border);border-radius:999px;padding:3px 8px;}
+.sync-dot{width:7px;height:7px;border-radius:50%;background:#ccc;flex-shrink:0;}
+.sync-dot.ok{background:var(--green);}
+.sync-dot.err{background:var(--red);animation:blink 1s infinite;}
+.sync-dot.load{background:var(--gold);animation:blink .6s infinite;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* countdown */
+.cdown{background:var(--gold);color:white;text-align:center;padding:6px 16px;font-size:.78rem;}
+.cdown strong{font-size:.9rem;}
+
+/* nav */
+.bnav{position:sticky;top:0;left:0;right:0;height:var(--nav-h);background:white;border-bottom:1.5px solid var(--border);display:flex;z-index:100;box-shadow:0 2px 12px rgba(0,0,0,.06);overflow-x:auto;}
+.nbtn{flex:1;min-width:72px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer;border:none;background:none;font-family:inherit;color:var(--text-muted);font-size:.6rem;transition:color .2s;white-space:nowrap;padding:0 4px;}
+.nbtn .ic{font-size:1.1rem;}
+.nbtn.on{color:var(--gold-dark);}
+.nbtn::before{content:'';display:block;width:22px;height:2px;border-radius:1px;background:transparent;margin-bottom:2px;}
+.nbtn.on::before{background:var(--gold);}
+
+/* aba não esquecer */
+.ne-header{background:white;margin:12px 14px 0;border-radius:14px;padding:16px;box-shadow:var(--shadow);border:1px solid var(--border);text-align:center;}
+.ne-title{font-size:1.1rem;color:var(--gold-dark);margin-bottom:4px;}
+.ne-sub{font-size:.78rem;color:var(--text-muted);}
+.ne-empty{text-align:center;color:var(--text-muted);font-size:.83rem;padding:30px 20px;font-style:italic;}
+.ne-add-wrap{display:flex;gap:8px;margin:10px 14px 20px;align-items:center;}
+.ne-input{flex:1;padding:11px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:.88rem;font-family:inherit;outline:none;background:white;}
+.ne-input:focus{border-color:var(--gold);}
+.ne-add-btn{width:42px;height:42px;border-radius:10px;background:var(--gold);color:white;border:none;font-size:1.4rem;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.ne-item{display:flex;align-items:flex-start;gap:10px;padding:11px 16px;border-bottom:1px solid var(--ivory);background:white;}
+.ne-item:first-child{border-radius:14px 14px 0 0;}
+.ne-item.dn .ne-tx{text-decoration:line-through;opacity:.4;}
+#neList{margin:10px 14px 0;border-radius:14px;box-shadow:var(--shadow);border:1px solid var(--border);overflow:hidden;}
+#neList:empty{display:none;}
+.ne-tx{flex:1;font-size:.86rem;line-height:1.45;cursor:pointer;}
+
+/* tabs */
+.tab{display:none;}
+.tab.on{display:block;}
+
+/* progress */
+.pcrd{background:white;margin:12px 14px 0;border-radius:14px;padding:13px 16px;box-shadow:var(--shadow);border:1px solid var(--border);}
+.plbl{display:flex;justify-content:space-between;align-items:center;font-size:.78rem;color:var(--text-muted);margin-bottom:6px;font-family:sans-serif;}
+.plbl .pct{color:var(--gold-dark);font-weight:bold;font-size:.9rem;}
+.bbar{background:var(--gold-light);border-radius:999px;height:7px;overflow:hidden;}
+.bfill{height:100%;border-radius:999px;background:linear-gradient(90deg,var(--gold),var(--gold-dark));transition:width .5s;}
+
+/* section */
+.sec{background:white;border-radius:14px;margin:12px 14px 0;box-shadow:var(--shadow);border:1px solid var(--border);overflow:hidden;}
+.sechd{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;cursor:pointer;user-select:none;border-bottom:1px solid var(--border);}
+.sectl{display:flex;align-items:center;gap:9px;font-size:.88rem;font-weight:bold;}
+.secic{font-size:1.08rem;}
+.secrt{display:flex;align-items:center;gap:8px;}
+.minibb{background:var(--ivory);border-radius:999px;height:4px;width:42px;overflow:hidden;}
+.minibf{height:100%;border-radius:999px;transition:width .5s;}
+.bdg{border-radius:999px;padding:2px 8px;font-size:.68rem;font-weight:bold;font-family:sans-serif;}
+.chv{font-size:.6rem;color:var(--text-muted);transition:transform .2s;}
+.sec.cls .chv{transform:rotate(-90deg);}
+.secbd{padding:3px 0;}
+.sec.cls .secbd{display:none;}
+
+/* items */
+.itm{display:flex;align-items:flex-start;gap:10px;padding:9px 14px;border-bottom:1px solid var(--ivory);transition:background .15s;}
+.itm:last-child{border-bottom:none;}
+.itm.dn{opacity:.4;}
+.itm.dn .itxt,.itm.dn .inm{text-decoration:line-through;}
+.chk{width:20px;height:20px;min-width:20px;border-radius:5px;border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:.68rem;color:white;margin-top:1px;transition:all .2s;cursor:pointer;flex-shrink:0;}
+.itxt{font-size:.84rem;line-height:1.42;flex:1;cursor:pointer;}
+.iinf{flex:1;}
+.inm{font-size:.84rem;line-height:1.35;cursor:pointer;}
+.imeta{display:flex;gap:7px;margin-top:3px;flex-wrap:wrap;align-items:center;}
+.iqty{font-size:.7rem;font-weight:bold;color:var(--gold-dark);background:var(--gold-light);padding:1px 7px;border-radius:999px;font-family:sans-serif;}
+.inote{font-size:.68rem;color:var(--text-muted);font-style:italic;}
+.subhd{font-size:.69rem;font-weight:bold;letter-spacing:.8px;text-transform:uppercase;color:var(--text-muted);padding:8px 16px 3px;border-bottom:1px solid var(--ivory);background:var(--cream);font-family:sans-serif;}
+
+/* action btns on items */
+.iactions{display:flex;gap:4px;align-items:center;flex-shrink:0;margin-left:4px;}
+.iact{background:none;border:none;cursor:pointer;font-size:.8rem;padding:3px 4px;border-radius:5px;color:var(--text-muted);transition:all .15s;line-height:1;}
+.iact:hover{background:var(--ivory);color:var(--red);}
+.iact.edit:hover{color:var(--blue);}
+
+/* inline add form */
+.add-form{padding:10px 14px;border-top:1px solid var(--ivory);background:var(--ivory);}
+.add-form input{width:100%;border:1.5px solid var(--border);border-radius:8px;padding:8px 10px;font-size:.83rem;font-family:inherit;background:white;outline:none;color:var(--text);}
+.add-form input:focus{border-color:var(--gold);}
+.add-form-row{display:flex;gap:6px;margin-top:6px;}
+.add-form input.qty-in{width:90px;flex-shrink:0;}
+.add-form input.main-in{flex:1;}
+.add-row-btns{display:flex;gap:6px;margin-top:6px;}
+.add-ok{flex:1;padding:7px;background:var(--gold);color:white;border:none;border-radius:8px;font-size:.8rem;cursor:pointer;font-family:inherit;}
+.add-ok:hover{background:var(--gold-dark);}
+.add-cancel{padding:7px 12px;background:none;border:1px solid var(--border);border-radius:8px;font-size:.8rem;cursor:pointer;color:var(--text-muted);font-family:inherit;}
+
+/* add trigger button */
+.add-trigger{display:flex;align-items:center;gap:6px;padding:9px 16px;cursor:pointer;font-size:.78rem;color:var(--gold-dark);font-family:sans-serif;border-top:1px dashed var(--border);background:none;width:100%;border-left:none;border-right:none;border-bottom:none;transition:background .15s;}
+.add-trigger:hover{background:var(--gold-light);}
+.add-trigger .plus{font-size:1rem;font-weight:bold;}
+
+/* themes */
+.th-ambos .sechd{background:linear-gradient(90deg,var(--rose-light),white);}
+.th-ambos .secnm{color:var(--rose-dark);}
+.th-ambos .minibf{background:var(--rose);}
+.th-ambos .bdg{background:var(--rose-light);color:var(--rose-dark);}
+.th-ambos .itm:hover{background:var(--rose-light);}
+.th-ambos .itm.dn .chk{background:var(--rose);border-color:var(--rose);}
+.th-tiago .sechd{background:linear-gradient(90deg,var(--blue-light),white);}
+.th-tiago .secnm{color:var(--blue);}
+.th-tiago .minibf{background:var(--blue);}
+.th-tiago .bdg{background:var(--blue-light);color:var(--blue);}
+.th-tiago .itm:hover{background:var(--blue-light);}
+.th-tiago .itm.dn .chk{background:var(--blue);border-color:var(--blue);}
+.th-ana .sechd{background:linear-gradient(90deg,var(--sage-light),white);}
+.th-ana .secnm{color:var(--sage);}
+.th-ana .minibf{background:var(--sage);}
+.th-ana .bdg{background:var(--sage-light);color:var(--sage);}
+.th-ana .itm:hover{background:var(--sage-light);}
+.th-ana .itm.dn .chk{background:var(--sage);border-color:var(--sage);}
+.th-gold .sechd{background:linear-gradient(90deg,var(--gold-light),white);}
+.th-gold .secnm{color:var(--gold-dark);}
+.th-gold .minibf{background:var(--gold);}
+.th-gold .bdg{background:var(--gold-light);color:var(--gold-dark);}
+.th-gold .itm:hover{background:var(--gold-light);}
+.th-gold .itm.dn .chk{background:var(--gold);border-color:var(--gold);}
+
+/* alert */
+.alert{margin:12px 14px 0;background:#fff8e7;border:1px solid var(--gold);border-radius:12px;padding:12px 15px;}
+.alert-t{font-size:.77rem;font-weight:bold;color:var(--gold-dark);margin-bottom:5px;font-family:sans-serif;}
+.alert ul{list-style:none;}
+.alert li{font-size:.77rem;color:var(--text);padding:2px 0;line-height:1.4;}
+.alert li::before{content:'⚠️ ';}
+
+/* suppliers */
+.supcrd{background:white;border-radius:14px;margin:12px 14px 0;box-shadow:var(--shadow);border:1px solid var(--border);overflow:hidden;}
+.suplh{display:flex;align-items:center;gap:9px;padding:11px 16px;background:var(--gold-light);border-bottom:1px solid var(--border);font-weight:bold;font-size:.86rem;color:var(--gold-dark);}
+.supitm{padding:11px 16px;border-bottom:1px solid var(--ivory);}
+.supitm:last-child{border-bottom:none;}
+.supnm{font-size:.87rem;font-weight:bold;margin-bottom:3px;}
+.supdt{font-size:.77rem;color:var(--text-muted);line-height:1.5;}
+.supdt a{color:var(--blue);text-decoration:none;}
+.suptg{display:inline-block;font-size:.65rem;padding:1px 6px;border-radius:999px;margin:3px 2px 0 0;background:var(--ivory);color:var(--text-muted);font-family:sans-serif;}
+
+/* share card */
+.share-card{margin:12px 14px 0;background:white;border-radius:14px;border:1px solid var(--border);box-shadow:var(--shadow);padding:16px;}
+.share-card h3{font-size:.88rem;color:var(--gold-dark);margin-bottom:10px;font-family:sans-serif;font-weight:bold;}
+.share-card p{font-size:.8rem;color:var(--text-muted);margin-bottom:12px;line-height:1.5;}
+.share-url{background:var(--ivory);border:1px solid var(--border);border-radius:8px;padding:9px 12px;font-size:.72rem;font-family:monospace;color:var(--text);word-break:break-all;margin-bottom:10px;}
+.btn-share{display:block;width:100%;padding:11px;background:var(--gold);color:white;border:none;border-radius:10px;font-size:.88rem;cursor:pointer;font-family:inherit;transition:background .2s;}
+.btn-share:hover{background:var(--gold-dark);}
+.btn-share.copied{background:var(--green);}
+
+/* celebration */
+.cel{display:none;text-align:center;padding:18px 16px;margin:12px 14px 0;background:linear-gradient(135deg,var(--gold-light),var(--rose-light));border-radius:14px;border:1px solid var(--border);font-size:.93rem;color:var(--gold-dark);font-style:italic;}
+.cel.on{display:block;}
+
+/* misc */
+.tfooter{text-align:center;margin:14px 14px 0;font-size:.69rem;color:var(--text-muted);font-style:italic;}
+.rbtn{display:block;margin:10px auto 0;background:none;border:1px solid var(--border);color:var(--text-muted);border-radius:999px;padding:5px 14px;font-size:.71rem;cursor:pointer;font-family:inherit;}
+.rbtn:hover{background:var(--gold-light);color:var(--gold-dark);}
+.dbtn{display:block;margin:10px auto 0;background:none;border:1px solid #fcc;color:#c0392b;border-radius:999px;padding:5px 14px;font-size:.69rem;cursor:pointer;font-family:inherit;}
+.dbtn:hover{background:#fff0f0;}
+
+/* edit modal */
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:200;align-items:flex-end;justify-content:center;}
+.modal-bg.on{display:flex;}
+.modal{background:white;border-radius:18px 18px 0 0;padding:20px 18px 32px;width:100%;max-width:500px;}
+.modal h3{font-size:.95rem;color:var(--gold-dark);margin-bottom:14px;font-family:sans-serif;}
+.modal input{width:100%;border:1.5px solid var(--border);border-radius:8px;padding:10px 12px;font-size:.88rem;font-family:inherit;outline:none;margin-bottom:8px;}
+.modal input:focus{border-color:var(--gold);}
+.modal-btns{display:flex;gap:8px;margin-top:4px;}
+.modal-btns button{flex:1;padding:11px;border:none;border-radius:10px;font-size:.88rem;cursor:pointer;font-family:inherit;}
+.modal-ok{background:var(--gold);color:white;}
+.modal-ok:hover{background:var(--gold-dark);}
+.modal-cancel{background:var(--ivory);color:var(--text-muted);}
+</style>
+</head>
+<body>
+
+<!-- SETUP -->
+<div id="screen-setup">
+  <div class="setup-hero">
+    <div class="setup-mono">A ✦ T</div>
+    <h1>Painel do Casamento</h1>
+    <p>Para sincronizar em tempo real entre os dois celulares,<br>conecte ao Firebase (gratuito — leva ~5 min).</p>
+  </div>
+  <div class="setup-card">
+    <h2>📋 Como configurar — passo a passo</h2>
+    <div class="step"><div class="step-n">1</div><p>Acesse <strong>firebase.google.com</strong> e entre com sua conta Google. Clique em <strong>"Criar um projeto"</strong>.</p></div>
+    <div class="step"><div class="step-n">2</div><p>Nome: <code>anaetiago-casamento</code> → desative o Google Analytics → <strong>Criar projeto</strong>.</p></div>
+    <div class="step"><div class="step-n">3</div><p>No painel, clique no ícone <strong>&lt;/&gt;</strong> → nome: <code>painel</code> → <strong>Registrar app</strong>. Copie o objeto <code>firebaseConfig</code>.</p></div>
+    <div class="step"><div class="step-n">4</div><p>Menu lateral: <strong>Compilação → Realtime Database → Criar banco → us-central1 → Modo de teste → Ativar</strong>.</p></div>
+    <div class="step"><div class="step-n">5</div><p>Cole o config abaixo e clique em conectar:</p></div>
+  </div>
+  <div class="setup-card">
+    <h2>📋 Cole sua configuração Firebase</h2>
+    <textarea class="cfg-area" id="cfgInput" placeholder='{"apiKey":"AIzaSy...","authDomain":"...","databaseURL":"https://anaetiago-casamento-default-rtdb.firebaseio.com",...}'></textarea>
+    <div class="setup-err" id="setupErr"></div>
+    <button class="btn-primary" onclick="connectFromSetup()">✓ Conectar e abrir painel</button>
+  </div>
+  <div class="skip-link">Sem acesso agora? <a onclick="goOffline()">Usar sem sincronização</a></div>
+</div>
+
+<!-- MAIN -->
+<div id="screen-main">
+  <div class="header">
+    <div class="sync-pill"><div class="sync-dot load" id="sdot"></div><span id="slbl" style="font-family:sans-serif">–</span></div>
+    <div class="monogram">A ✦ T</div>
+    <h1>Ana <span>&</span> Tiago</h1>
+    <div class="date-line">13 de junho de 2026 · Fernandópolis, SP</div>
+    <span class="floral">🌿 ✦ 🌹 ✦ 🌿</span>
+  </div>
+  <nav class="bnav">
+    <button class="nbtn on" id="nb-p" onclick="goTab('p')"><span class="ic">📋</span>Pendências</button>
+    <button class="nbtn" id="nb-c" onclick="goTab('c')"><span class="ic">🛒</span>Compras</button>
+    <button class="nbtn" id="nb-f" onclick="goTab('f')"><span class="ic">📍</span>Fornecedores</button>
+    <button class="nbtn" id="nb-n" onclick="goTab('n')"><span class="ic">⭐</span>Não Esquecer</button>
+    <button class="nbtn" id="nb-v" onclick="goTab('v')"><span class="ic">🧳</span>Viagem</button>
+    <!-- NOVA ABA: copie uma linha acima, troque a letra, mude ícone e texto, adicione ao goTab() -->
+  </nav>
+  <div class="cdown" id="cdown">Calculando…</div>
+
+  <!-- PENDÊNCIAS -->
+  <div class="tab on" id="tab-p">
+    <div class="pcrd">
+      <div class="plbl"><span>Progresso das pendências</span><span class="pct" id="pPct">0%</span></div>
+      <div class="bbar"><div class="bfill" id="pBar" style="width:0%"></div></div>
+    </div>
+    <div id="secP"></div>
+    <div class="cel" id="celP">✝️ Todas as pendências concluídas! Que o sacramento de vocês seja eterno. 🌹<br><small style="font-size:.76rem;margin-top:4px;display:block;">Ad maiorem Dei gloriam</small></div>
+    <button class="rbtn" onclick="resetTasks()">↺ Redefinir pendências</button>
+    <div class="tfooter">Toque ✓ para concluir · ✏ editar · 🗑 excluir</div>
+  </div>
+
+  <!-- COMPRAS -->
+  <div class="tab" id="tab-c">
+    <div class="pcrd">
+      <div class="plbl"><span>Itens já comprados</span><span class="pct" id="cPct">0%</span></div>
+      <div class="bbar"><div class="bfill" id="cBar" style="width:0%"></div></div>
+    </div>
+    <div class="alert">
+      <div class="alert-t">📋 Observações importantes</div>
+      <ul>
+        <li>Toda entrega até as 8h da manhã do dia 13/06</li>
+        <li>Frutas precisam estar maduras em 13/06 — sinalizar ao vendedor</li>
+        <li>Incluir alimentação das equipes: almoço + jantar p/ cozinha; jantar p/ demais</li>
+      </ul>
+    </div>
+    <div id="secC"></div>
+    <div class="cel" id="celC">🛒 Tudo comprado! A festa vai ser incrível! 🎉</div>
+    <button class="rbtn" onclick="resetShop()">↺ Redefinir compras</button>
+    <div class="tfooter">Toque ✓ para marcar comprado · ✏ editar · 🗑 excluir</div>
+  </div>
+
+  <!-- NÃO ESQUECER -->
+  <div class="tab" id="tab-n">
+    <div class="pcrd">
+      <div class="plbl"><span>⭐ Não Esquecer — itens verificados</span><span class="pct" id="nePct">0%</span></div>
+      <div class="bbar"><div class="bfill" id="neBar" style="width:0%"></div></div>
+    </div>
+    <div id="secNE"></div>
+    <div class="tfooter">Toque ✓ para confirmar · ✏ editar · 🗑 excluir</div>
+  </div>
+
+  <!-- CHECK-LIST VIAGEM -->
+  <div class="tab" id="tab-v">
+    <div class="pcrd">
+      <div class="plbl"><span>🧳 Itens na mala</span><span class="pct" id="trPct">0%</span></div>
+      <div class="bbar"><div class="bfill" id="trBar" style="width:0%"></div></div>
+    </div>
+    <div id="secTR"></div>
+    <div class="tfooter">Toque ✓ para confirmar · ✏ editar · 🗑 excluir</div>
+  </div>
+
+  <!-- FORNECEDORES -->
+  <div class="tab" id="tab-f">
+
+    <!-- SHARE CARD -->
+    <div class="share-card">
+      <h3>📤 Compartilhar com a Ana</h3>
+      <p>Clique no botão abaixo para copiar o link especial. A Ana só precisa abrir — conecta automático, sem configuração.</p>
+      <div class="share-url" id="shareUrl">Gerando link…</div>
+      <button class="btn-share" id="shareBtn" onclick="copyLink()">📋 Copiar link para o WhatsApp</button>
+    </div>
+
+    <div class="supcrd">
+      <div class="suplh">📍 Fernandópolis</div>
+      <div class="supitm"><div class="supnm">Quitanda Fontes</div><div class="supdt">Frutas, verduras e legumes · <strong>Aceita encomendas</strong></div><div><span class="suptg">🥬 Feira</span><span class="suptg">📦 Encomenda</span></div></div>
+      <div class="supitm"><div class="supnm">Padaria Estrela Guia</div><div class="supdt">Av. 18 · Aceita encomendas · Boa variedade de pães</div><div><span class="suptg">🥖 Padaria</span><span class="suptg">📦 Encomenda</span></div></div>
+      <div class="supitm"><div class="supnm">Cestari — Massa de Pastel</div><div class="supdt">Banca na feira · Vende somente a massa (10 kg necessários)</div><div><span class="suptg">🧀 Resfriado</span><span class="suptg">🏪 Feira local</span></div></div>
+      <div class="supitm"><div class="supnm">Atacados locais</div><div class="supdt">Para volumes grandes: azeite (16 L), óleo (20 L), feijão (10 kg), espaguete (11 kg)</div><div><span class="suptg">🫙 Mercearia</span><span class="suptg">🧹 Outros</span></div></div>
+    </div>
+    <div class="supcrd">
+      <div class="suplh">📍 Ribeirão Preto</div>
+      <div class="supitm"><div class="supnm">Makro / Atacadão / Sam's Club</div><div class="supdt">Volumes grandes: óleos, queijos em peça, frios, descartáveis, limpeza</div><div><span class="suptg">🧀 Resfriado</span><span class="suptg">🧹 Outros</span><span class="suptg">🫙 Mercearia</span></div></div>
+      <div class="supitm"><div class="supnm">Empório / delicatessen</div><div class="supdt">Itens gourmet: húmus, tomate seco, azeitonas, chimichurri, garam masala, vinagre de arroz</div><div><span class="suptg">🫙 Mercearia gourmet</span></div></div>
+      <div class="supitm"><div class="supnm">Peixaria / frigorífico</div><div class="supdt">Filé de tilápia limpo (20 kg)</div><div><span class="suptg">🥩 Carne</span></div></div>
+    </div>
+    <div class="supcrd">
+      <div class="suplh">📍 Ibitinga</div>
+      <div class="supitm"><div class="supnm">Atacados e distribuidores</div><div class="supdt">Comparar preços de carnes (costela suína 115 kg, Angus 75 kg)</div><div><span class="suptg">🥩 Carne</span><span class="suptg">🫙 Mercearia</span></div></div>
+      <div class="supitm"><div class="supnm">Bordados — Tio Pet</div><div class="supdt">Guardanapos bordados · <strong>Pendente: cobrar confirmação</strong></div><div><span class="suptg">🧵 Enxoval</span><span class="suptg">⏳ Aguardando</span></div></div>
+    </div>
+    <div class="supcrd">
+      <div class="suplh">🌐 Internet</div>
+      <div class="supitm"><div class="supnm">Empório Taybe</div><div class="supdt"><a href="https://emporiotaybe.com.br" target="_blank">emporiotaybe.com.br</a> · Húmus (4 kg)</div><div><span class="suptg">🫙 Mercearia</span></div></div>
+      <div class="supitm"><div class="supnm">Mercado Livre / Shopee</div><div class="supdt">Cebola crispy (1 kg), molho barbecue (8 kg), álcool acendedor gel (10 L), luvas, filme PVC, papel alumínio</div><div><span class="suptg">🫙 Mercearia</span><span class="suptg">🧹 Outros</span></div></div>
+      <div class="supitm"><div class="supnm">Amazon / Lojas online</div><div class="supdt">Quadro bênção apostólica, porta-retratos, envelopes, apetrechos copa</div><div><span class="suptg">🎀 Decoração</span></div></div>
+      <div class="supitm"><div class="supnm">Rodolfo — Decorações</div><div class="supdt">Aceita encomendas · Faz despacho ou entrega · <strong>📞 (11) 96465-7033</strong></div><div><span class="suptg">🌸 Decoração</span></div></div>
+    </div>
+    <div class="tfooter" style="margin-bottom:4px">Baseado nas notas da planilha de compras</div>
+    <button class="dbtn" onclick="reconfig()">⚙ Reconfigurar Firebase</button>
+  </div>
+
+</div>
+
+<!-- EDIT MODAL -->
+<div class="modal-bg" id="editModal">
+  <div class="modal">
+    <h3 id="modalTitle">Editar item</h3>
+    <input id="modalText" placeholder="Texto do item">
+    <input id="modalQty" placeholder="Quantidade (ex: 2 kg)" style="display:none">
+    <div class="modal-btns">
+      <button class="modal-cancel" onclick="closeModal()">Cancelar</button>
+      <button class="modal-ok" onclick="saveModal()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script>
+/* ═══════════ DEFAULT DATA ═══════════ */
+const TD={
+  ambos:{ic:'💑',lb:'Ambos',th:'th-ambos',items:[
+    {id:'a1',tx:'Reservar 30 rosas com a florista — 24 rosas + 6 brancas (R$ 360)'},
+    {id:'a2',tx:'Escrever carta para pais e padrinhos'},
+    {id:'a3',tx:'Comprar brinde para sorteio "Operação Lua de Mel"'},
+    {id:'a4',tx:'Comprar apetrechos copa (comparar preços — fotos no cel do Tiago)'},
+  ]},
+  tiago:{ic:'🤵',lb:'Tiago',th:'th-tiago',items:[
+    {id:'t1',tx:'Montar instrução para as cartas dos convidados (trem de acrílico)'},
+    {id:'t2',tx:'Montar número da mesa e cardápio — nomes das comidas e doces'},
+    {id:'t3',tx:'Montar papel de carta'},{id:'t4',tx:'Montar caixa para cartas'},
+    {id:'t5',tx:'Confirmar com a Boa Semente imagem da Sagrada Família',df:1},
+    {id:'t6',tx:'Comprar Sagrada Família',df:1},
+    {id:'t7',tx:'Cobrar tio Pet sobre os guardanapos / bordados'},
+    {id:'t8',tx:'Comprar envelopes para cartas — pais, padrinhos e convidados (net)'},
+    {id:'t9',tx:'Comprar quadro para a Bênção Apostólica (net)',df:1},
+    {id:'t10',tx:'Comprar porta-retrato avós (in memoriam) e imprimir fotos'},
+    {id:'t11',tx:'Revelar fotos para decoração'},{id:'t12',tx:'Imprimir convite'},
+    {id:'t13',tx:'Fazer QR Code — Operação Lua de Mel'},
+  ]},
+  ana:{ic:'👰',lb:'Ana',th:'th-ana',items:[
+    {id:'n1',tx:'Montar e etiquetar aromatizadores'},{id:'n2',tx:'Montar lágrimas de alegria'},
+    {id:'n3',tx:'Comprar itens do kit banheiro'},{id:'n4',tx:'Montar cardápio para mesa e QR code'},
+  ]}
+};
+
+const SD=[
+  {id:'carne',ic:'🥩',lb:'Carne',th:'th-ambos',items:[
+    {id:'c1',nm:'Carne Angus',qt:'75 kg',nt:'limpa, cortada em escalope'},
+    {id:'c2',nm:'Costela suína',qt:'115 kg',nt:'com osso'},
+    {id:'c3',nm:'Filé de coxa/sobrecoxa',qt:'85 kg',nt:'desossada'},
+    {id:'c4',nm:'Filé de tilápia',qt:'20 kg',nt:'limpo'},{id:'c5',nm:'Patinho moído',qt:'30 kg',nt:''},
+  ]},
+  {id:'feira',ic:'🥬',lb:'Feira',th:'th-ana',sub:[
+    {sb:'🍓 Frutas',items:[
+      {id:'fa1',nm:'Manga',qt:'3 kg',nt:'tommy, palmer ou keith'},{id:'fa2',nm:'Morango',qt:'2 kg',nt:''},
+      {id:'fa3',nm:'Kiwi',qt:'1,5 kg',nt:''},{id:'fa4',nm:'Carambola',qt:'1,5 kg',nt:''},{id:'fa5',nm:'Limão taiti',qt:'15 kg',nt:''},
+    ]},
+    {sb:'🥬 Verduras',items:[
+      {id:'fv1',nm:'Alface roxa',qt:'5 kg',nt:''},{id:'fv2',nm:'Alface americana',qt:'5 kg',nt:''},
+      {id:'fv3',nm:'Hortelã',qt:'300 g',nt:''},{id:'fv4',nm:'Rúcula',qt:'10 kg',nt:''},
+      {id:'fv5',nm:'Alecrim fresco',qt:'150 g',nt:''},{id:'fv6',nm:'Tomilho fresco',qt:'250 g',nt:''},
+      {id:'fv7',nm:'Salsinha',qt:'650 g',nt:''},{id:'fv8',nm:'Alface romana',qt:'5 kg',nt:''},
+      {id:'fv9',nm:'Cebolinha',qt:'150 g',nt:''},{id:'fv10',nm:'Couve manteiga',qt:'2 kg',nt:''},
+    ]},
+    {sb:'🥕 Legumes',items:[
+      {id:'fl1',nm:'Abobrinha italiana',qt:'4 kg',nt:''},{id:'fl2',nm:'Alho fresco',qt:'4 kg',nt:''},
+      {id:'fl3',nm:'Batata comum',qt:'32 kg',nt:''},{id:'fl4',nm:'Berinjela',qt:'5,5 kg',nt:''},
+      {id:'fl5',nm:'Brócolis ninja',qt:'4 kg',nt:''},{id:'fl6',nm:'Brócolis ramoso',qt:'4 kg',nt:''},
+      {id:'fl7',nm:'Cebola',qt:'4,5 kg',nt:''},{id:'fl8',nm:'Cebola roxa',qt:'4,5 kg',nt:''},
+      {id:'fl9',nm:'Cenoura',qt:'5,5 kg',nt:''},{id:'fl10',nm:'Couve-flor',qt:'4 kg',nt:''},
+      {id:'fl11',nm:'Pepino japonês',qt:'6,5 kg',nt:''},{id:'fl12',nm:'Pimenta biquinho',qt:'1 kg',nt:''},
+      {id:'fl13',nm:'Pimentão amarelo',qt:'1 kg',nt:''},{id:'fl14',nm:'Pimentão vermelho',qt:'1 kg',nt:''},
+      {id:'fl15',nm:'Tangerina murcott',qt:'5 kg',nt:''},
+      {id:'fl16',nm:'Tomate cereja/grape',qt:'18 kg',nt:'dividir: vermelho, amarelo, verde, laranja'},
+      {id:'fl17',nm:'Tomate comum',qt:'2 kg',nt:'bem maduro no dia 13/06'},
+      {id:'fl18',nm:'Figo roxo',qt:'2 kg',nt:''},{id:'fl19',nm:'Tomate em rama',qt:'3 kg',nt:''},
+      {id:'fl20',nm:'Tomates exóticos',qt:'2 kg',nt:''},{id:'fl21',nm:'Uva verde',qt:'5 kg',nt:''},
+      {id:'fl22',nm:'Uva roxa',qt:'5 kg',nt:''},{id:'fl23',nm:'Cogumelo enoki',qt:'1 kg',nt:''},
+      {id:'fl24',nm:'Cogumelo portobelo',qt:'1 kg',nt:''},{id:'fl25',nm:'Mini cenoura',qt:'1 kg',nt:''},
+      {id:'fl26',nm:'Mini milho',qt:'1 kg',nt:''},{id:'fl27',nm:'Mini berinjela',qt:'1 kg',nt:''},
+      {id:'fl28',nm:'Mini beterraba',qt:'1 kg',nt:''},
+    ]},
+    {sb:'🌿 Decoração (plantas)',items:[
+      {id:'fd1',nm:'Pé de tomate',qt:'3 un',nt:''},{id:'fd2',nm:'Pé de morango',qt:'3 un',nt:''},
+      {id:'fd3',nm:'Pé de manjericão verde',qt:'4 un',nt:''},{id:'fd4',nm:'Pé de manjericão roxo',qt:'2 un',nt:''},
+      {id:'fd5',nm:'Pé de tomilho limão',qt:'4 un',nt:''},{id:'fd6',nm:'Pé de lavanda',qt:'4 un',nt:''},
+      {id:'fd7',nm:'Pé de hortelã',qt:'3 un',nt:''},{id:'fd8',nm:'Pé de alecrim',qt:'2 un',nt:''},
+      {id:'fd9',nm:'Broto de cenoura',qt:'4 pct',nt:''},{id:'fd10',nm:'Broto de agrião',qt:'2 pct',nt:''},
+      {id:'fd11',nm:'Broto de alfafa',qt:'2 pct',nt:''},{id:'fd12',nm:'Mix flores',qt:'2 pct',nt:''},
+      {id:'fd13',nm:'Orquídea baby',qt:'2 vasos',nt:''},{id:'fd14',nm:'Flor de mel',qt:'2 vasos',nt:''},
+    ]},
+  ]},
+  {id:'mercearia',ic:'🫙',lb:'Mercearia',th:'th-gold',items:[
+    {id:'m1',nm:'Açúcar refinado',qt:'2 kg',nt:''},{id:'m2',nm:'Adoçante líquido',qt:'200 ml',nt:''},
+    {id:'m3',nm:'Arroz',qt:'20 kg',nt:''},{id:'m4',nm:'Azeite extra virgem',qt:'16 L',nt:''},
+    {id:'m5',nm:'Azeitona preta',qt:'2,5 kg',nt:'peso líquido'},{id:'m6',nm:'Azeitona verde s/ caroço',qt:'4 kg',nt:'peso líquido'},
+    {id:'m7',nm:'Café em pó',qt:'2 kg',nt:'Cerrado Mineiro Gourmet 3 Corações'},
+    {id:'m8',nm:'Cebola crispy',qt:'1 kg',nt:'ver Mercado Livre'},{id:'m9',nm:'Cebolinha pérola conserva',qt:'5 kg',nt:'peso líquido'},
+    {id:'m10',nm:'Creme de leite',qt:'7 kg',nt:''},{id:'m11',nm:'Chimichurri',qt:'200 g',nt:'mistura pronta'},
+    {id:'m12',nm:'Ervilha',qt:'1 kg',nt:'peso líquido'},{id:'m13',nm:'Farinha bijú (Deusa)',qt:'6,5 kg',nt:''},
+    {id:'m14',nm:'Farinha de milho (flocão)',qt:'2,5 kg',nt:''},{id:'m15',nm:'Amido de milho',qt:'1 kg',nt:''},
+    {id:'m16',nm:'Feijão carioca',qt:'10 kg',nt:''},{id:'m17',nm:'Garam masala (kibe)',qt:'25 g',nt:''},
+    {id:'m18',nm:'Gergelim branco',qt:'300 g',nt:''},{id:'m19',nm:'Húmus',qt:'4 kg',nt:'emporiotaybe.com.br'},
+    {id:'m20',nm:'Leite integral',qt:'16 L',nt:''},{id:'m21',nm:'Espaguete',qt:'11 kg',nt:''},
+    {id:'m22',nm:'Maionese',qt:'1,5 kg',nt:''},{id:'m23',nm:'Milho (conserva)',qt:'1 kg',nt:'peso líquido'},
+    {id:'m24',nm:'Molho barbecue',qt:'8 kg',nt:'ver Mercado Livre'},{id:'m25',nm:'Molho mostarda',qt:'2 kg',nt:''},
+    {id:'m26',nm:'Molho shoyu',qt:'3 L',nt:''},{id:'m27',nm:'Óleo de soja',qt:'20 L',nt:''},
+    {id:'m28',nm:'Ovo de codorna (conserva)',qt:'5 kg',nt:'peso líquido'},{id:'m29',nm:'Palmito tolete',qt:'7 kg',nt:'peso líquido'},
+    {id:'m30',nm:'Pimenta do reino em grão',qt:'100 g',nt:''},{id:'m31',nm:'Açúcar em sachê',qt:'2 kg',nt:''},
+    {id:'m32',nm:'Sal refinado',qt:'6 kg',nt:''},{id:'m33',nm:'Sardinha ou atum lata',qt:'2,5 kg',nt:'para cuscuz'},
+    {id:'m34',nm:'Tomate seco',qt:'5 kg',nt:'peso líquido'},{id:'m35',nm:'Trigo para kibe',qt:'2 kg',nt:''},
+    {id:'m36',nm:'Vinagre de arroz',qt:'1 L',nt:''},{id:'m37',nm:'Noz-moscada',qt:'50 g',nt:''},
+    {id:'m38',nm:'Uva passa',qt:'800 g',nt:'preta e branca'},{id:'m39',nm:'Ovo de galinha',qt:'20 un',nt:''},
+    {id:'m40',nm:'Louro',qt:'20 g',nt:''},
+  ]},
+  {id:'resfriado',ic:'🧊',lb:'Resfriado & Congelado',th:'th-tiago',items:[
+    {id:'r1',nm:'Bacon',qt:'5 kg',nt:''},{id:'r2',nm:'Linguiça calabresa',qt:'3 kg',nt:''},
+    {id:'r3',nm:'Lombo canadense',qt:'7 kg',nt:'fatiado'},{id:'r4',nm:'Manteiga',qt:'5 kg',nt:'preferência por manteiga extra'},
+    {id:'r5',nm:'Massa de pastel',qt:'10 kg',nt:'Cestari — banca na feira'},
+    {id:'r6',nm:'Muçarela',qt:'15 kg',nt:'em peça'},{id:'r7',nm:'Presunto cozido',qt:'5 kg',nt:'em peça'},
+    {id:'r8',nm:'Queijo prato',qt:'5 kg',nt:'em peça'},{id:'r9',nm:'Queijo provolone',qt:'7 kg',nt:'5 kg fatiado + 2 kg em peça'},
+    {id:'r10',nm:'Requeijão cremoso s/ amido',qt:'4 kg',nt:''},{id:'r11',nm:'Salame italiano',qt:'7 kg',nt:'fatiado'},
+    {id:'r12',nm:'Parmesão',qt:'3 kg',nt:'fresco ou ralado'},{id:'r13',nm:'Caldo de cana',qt:'25 L',nt:''},
+    {id:'r14',nm:'Bala de coco',qt:'5 kg',nt:''},{id:'r15',nm:'Batata palito extra fina',qt:'35 kg',nt:'congelado'},
+  ]},
+  {id:'padaria',ic:'🥖',lb:'Padaria',th:'th-ambos',items:[
+    {id:'p1',nm:'Baguete longa',qt:'10 un',nt:''},{id:'p2',nm:'Mini australiano',qt:'2 kg',nt:''},
+    {id:'p3',nm:'Mini brioche',qt:'2 kg',nt:''},{id:'p4',nm:'Mini ciabata',qt:'2 kg',nt:''},
+    {id:'p5',nm:'Mini croissant',qt:'2 kg',nt:''},{id:'p6',nm:'Mini francês',qt:'2 kg',nt:'total 10 kg'},
+  ]},
+  {id:'outros',ic:'🧹',lb:'Outros / Copa',th:'th-ana',items:[
+    {id:'o1',nm:'Copo descartável 200 ml',qt:'200 un',nt:''},{id:'o2',nm:'Papel toalha',qt:'8 rolos',nt:''},
+    {id:'o3',nm:'Guardanapo de papel premium',qt:'500 un',nt:''},{id:'o4',nm:'Toalha tipo Perflex (600 panos)',qt:'1 rolo',nt:''},
+    {id:'o5',nm:'Papel alumínio bobina',qt:'100 m',nt:''},{id:'o6',nm:'Filme PVC bobina',qt:'300 m',nt:''},
+    {id:'o7',nm:'Assadeira alumínio 7 L',qt:'10 un',nt:''},{id:'o8',nm:'Esponja leve (azul)',qt:'10 un',nt:''},
+    {id:'o9',nm:'Esponja pesada (verde/amarela)',qt:'10 un',nt:''},{id:'o10',nm:'Detergente Ypê transparente',qt:'6 un',nt:''},
+    {id:'o11',nm:'Desentupidor Diabo Verde',qt:'1 L',nt:''},{id:'o12',nm:'Fósforo (pct c/ 10 caixinhas)',qt:'1 pct',nt:''},
+    {id:'o13',nm:'Pano de chão absorvente',qt:'4 un',nt:''},{id:'o14',nm:'Luva vinil descartável M',qt:'100 un',nt:'s/ talco'},
+    {id:'o15',nm:'Álcool líquido 70%',qt:'5 L',nt:'s/ cheiro'},{id:'o16',nm:'Vela de citronela',qt:'2 un',nt:''},
+    {id:'o17',nm:'Palito de dente',qt:'1 cx',nt:''},{id:'o18',nm:'Filtro de café descartável',qt:'300 un',nt:''},
+    {id:'o19',nm:'Álcool acendedor gel',qt:'10 L',nt:''},
+  ]},
+];
+
+/* ═══════════ NÃO ESQUECER DATA ═══════════ */
+const NE_DATA=[
+  {id:'neg',lb:'Itens do Casamento',ic:'✝️',th:'th-gold',items:[
+    {id:'ne01',tx:'Terço'},{id:'ne02',tx:'Cruz'},{id:'ne03',tx:'Bíblia'},
+    {id:'ne04',tx:'Bênção apostólica'},{id:'ne05',tx:'Quadros avós'},
+    {id:'ne06',tx:'Sagrada Família'},{id:'ne07',tx:'Papel para cartas dos convidados'},
+    {id:'ne08',tx:'Caixa para pôr as cartas'},
+    {id:'ne09',tx:'Orientações para as cartas com acrílico'},
+    {id:'ne10',tx:'Guardanapos'},{id:'ne11',tx:'Quadros foto decoração'},
+    {id:'ne12',tx:'Buquê Santo Antônio'},
+    {id:'ne13',tx:'Cofrinho operação lua de mel com QR code'},
+    {id:'ne14',tx:'Adesivo operação lua de mel'},
+    {id:'ne15',tx:'Número mesa com cardápio'},{id:'ne16',tx:'Identificação comidas'},
+    {id:'ne17',tx:'Sabonete banheiro'},{id:'ne18',tx:'Papel higiênico'},
+    {id:'ne19',tx:'Papel secar mão banheiro'},{id:'ne20',tx:'Taças presente Greide'},
+    {id:'ne21',tx:'Pantufas Greide e Carmem'},
+    {id:'ne22',tx:'Cestinhas das floristas (se precisar está lá kkk)'},
+    {id:'ne23',tx:'Azeites'},
+  ]},
+  {id:'nea',lb:'Ana',ic:'👰',th:'th-ana',items:[
+    {id:'nea1',tx:'Passaporte ⭐'},{id:'nea2',tx:'Mini ferro'},
+    {id:'nea3',tx:'Maquiagem'},{id:'nea4',tx:'Abafador de ruídos'},
+    {id:'nea5',tx:'Potes viagem de 100ml'},
+    {id:'nea6',tx:'Pode deixar em Ibitinga: meias, permanganato, lancheira térmica, pote hermético retrátil'},
+  ]},
+  {id:'net',lb:'Tiago',ic:'🤵',th:'th-tiago',items:[
+    {id:'net1',tx:'Passaporte ⭐'},{id:'net2',tx:'Acessórios terno'},
+    {id:'net3',tx:'Sapato, cinto e meia casamento'},{id:'net4',tx:'Itens mala'},
+  ]},
+];
+
+/* ═══════════ VIAGEM DATA ═══════════ */
+const TRV_DATA=[
+  {id:'trvmal',lb:'Mala viagem',ic:'🧳',th:'th-gold',items:[
+    {id:'tr01',tx:'Cueca'},{id:'tr02',tx:'Meia'},{id:'tr03',tx:'Camiseta'},
+    {id:'tr04',tx:'Camisa'},{id:'tr05',tx:'Calça'},{id:'tr06',tx:'Short'},
+    {id:'tr07',tx:'Cinto'},{id:'tr08',tx:'Chinelo'},{id:'tr09',tx:'Tênis'},
+    {id:'tr10',tx:'Terno (após casório kkk)'},
+    {id:'tr11',tx:'Itens higiene pessoal (cabelo, barba, escova dente, pasta, perfume, desodorante)'},
+    {id:'tr12',tx:'Lente de contato e líquido'},{id:'tr13',tx:'Óculos grau e sol'},
+    {id:'tr14',tx:'Terço'},{id:'tr15',tx:'Sinal'},{id:'tr16',tx:'Fone de ouvido'},
+    {id:'tr17',tx:'Relógio'},{id:'tr18',tx:'Carregadores'},{id:'tr19',tx:'Tablet'},
+    {id:'tr20',tx:'Travesseiro'},{id:'tr21',tx:'Stavigile e receita'},
+    {id:'tr22',tx:'Providenciar roupa pré wedding'},
+  ]},
+];
+
+/* ═══════════ STATE ═══════════ */
+const CFG_KEY='at_fbcfg3',OFF_KEY='at_off3',ODK='at_od3';
+let doneT={},doneS={},extT={},extS={},hid={},rootRef=null,isOffline=false;
+let doneNE={},extNE={},doneTR={},extTR={};
+let modalCb=null;
+
+/* ═══════════ CONFIG EMBUTIDA ═══════════ */
+const EMBEDDED_CFG={apiKey:"AIzaSyBWZV1ndQ0w57L6NsQ5nQ3wjjO6vVlVUn4",authDomain:"anaetiago-casamento.firebaseapp.com",databaseURL:"https://anaetiago-casamento-default-rtdb.firebaseio.com",projectId:"anaetiago-casamento",storageBucket:"anaetiago-casamento.firebasestorage.app",messagingSenderId:"865095422320",appId:"1:865095422320:web:b78f9978f7c6bf4f4ebfb5"};
+
+/* ═══════════ INIT ═══════════ */
+window.addEventListener('load',()=>{
+  tick(); setInterval(tick,60000);
+  // Check URL hash for auto-connect
+  if(location.hash.startsWith('#k=')){
+    try{
+      const cfg=JSON.parse(atob(location.hash.slice(3)));
+      localStorage.setItem(CFG_KEY,JSON.stringify(cfg));
+      history.replaceState(null,'',location.pathname);
+      connectFB(cfg); return;
+    }catch{}
+  }
+  const cfg=localStorage.getItem(CFG_KEY);
+  if(cfg){try{connectFB(JSON.parse(cfg));return;}catch{localStorage.removeItem(CFG_KEY);}}
+  if(localStorage.getItem(OFF_KEY)){goOffline(true);return;}
+  // Auto-conectar com config embutida
+  localStorage.setItem(CFG_KEY,JSON.stringify(EMBEDDED_CFG));
+  connectFB(EMBEDDED_CFG);
+});
+
+/* ═══════════ SETUP ═══════════ */
+function connectFromSetup(){
+  const raw=document.getElementById('cfgInput').value.trim();
+  document.getElementById('setupErr').textContent='';
+  let cfg;
+  try{
+    cfg=JSON.parse(raw);
+    if(!cfg.apiKey) throw new Error('apiKey não encontrado');
+    if(!cfg.databaseURL) throw new Error('databaseURL não encontrado — crie o Realtime Database primeiro');
+  }catch(e){
+    document.getElementById('setupErr').textContent='❌ '+e.message;
+    return;
+  }
+  localStorage.setItem(CFG_KEY,JSON.stringify(cfg));
+  connectFB(cfg);
+}
+
+function connectFB(cfg){
+  try{
+    const app=firebase.initializeApp(cfg);
+    const db=firebase.database(app);
+    rootRef=db.ref('casamento_at');
+    showMain();
+    setSyncStatus('load','Conectando…');
+    rootRef.on('value',snap=>{
+      const d=snap.val()||{};
+      doneT=d.done_t||defTasks();
+      doneS=d.done_s||{};
+      extT=d.ext_t||{};
+      extS=d.ext_s||{};
+      hid=d.hid||{};
+      doneNE=d.done_ne||{}; extNE=d.ext_ne||{};
+      doneTR=d.done_tr||{}; extTR=d.ext_tr||{};
+      renderP(); renderC(); renderNE(); renderTR();
+      setSyncStatus('ok','Sincronizado');
+      updateShareLink();
+    },()=>setSyncStatus('err','Sem conexão'));
+  }catch(e){
+    localStorage.removeItem(CFG_KEY);
+    document.getElementById('screen-setup').style.display='block';
+    document.getElementById('screen-main').style.display='none';
+    document.getElementById('setupErr').textContent='❌ '+e.message;
+  }
+}
+
+function goOffline(silent){
+  isOffline=true; localStorage.setItem(OFF_KEY,'1');
+  try{const d=JSON.parse(localStorage.getItem(ODK)||'{}');doneT=d.done_t||defTasks();doneS=d.done_s||{};extT=d.ext_t||{};extS=d.ext_s||{};hid=d.hid||{};doneNE=d.done_ne||{};extNE=d.ext_ne||{};doneTR=d.done_tr||{};extTR=d.ext_tr||{};}
+  catch{doneT=defTasks();doneS={};extT={};extS={};hid={};doneNE={};extNE={};doneTR={};extTR={};}
+  showMain(); setSyncStatus('err','Modo offline');
+  renderP(); renderC(); renderNE(); renderTR();
+}
+function showMain(){document.getElementById('screen-setup').style.display='none';document.getElementById('screen-main').style.display='block';}
+function reconfig(){if(!confirm('Reconfigurar o Firebase?'))return;localStorage.removeItem(CFG_KEY);localStorage.removeItem(OFF_KEY);location.reload();}
+function defTasks(){const d={};Object.values(TD).forEach(g=>g.items.forEach(t=>{if(t.df)d[t.id]=true;}));return d;}
+
+/* ═══════════ SAVE ═══════════ */
+function saveAll(){
+  const data={done_t:doneT,done_s:doneS,ext_t:extT,ext_s:extS,hid,done_ne:doneNE,ext_ne:extNE,done_tr:doneTR,ext_tr:extTR};
+  if(isOffline){localStorage.setItem(ODK,JSON.stringify(data));return;}
+  if(rootRef) rootRef.set(data);
+}
+
+/* ═══════════ SHARE LINK ═══════════ */
+function updateShareLink(){
+  const cfg=localStorage.getItem(CFG_KEY);
+  if(!cfg){document.getElementById('shareUrl').textContent='Configure o Firebase para gerar o link.';return;}
+  const encoded=btoa(cfg);
+  const url=location.origin+location.pathname+'#k='+encoded;
+  document.getElementById('shareUrl').textContent=url;
+}
+function copyLink(){
+  const url=document.getElementById('shareUrl').textContent;
+  navigator.clipboard.writeText(url).then(()=>{
+    const btn=document.getElementById('shareBtn');
+    btn.textContent='✅ Link copiado! Cole no WhatsApp da Ana.';
+    btn.classList.add('copied');
+    setTimeout(()=>{btn.textContent='📋 Copiar link para o WhatsApp';btn.classList.remove('copied');},3000);
+  }).catch(()=>{
+    prompt('Copie este link:',url);
+  });
+}
+
+/* ═══════════ SYNC STATUS ═══════════ */
+function setSyncStatus(st,lb){document.getElementById('sdot').className='sync-dot '+st;document.getElementById('slbl').textContent=lb;}
+
+/* ═══════════ RENDER PENDÊNCIAS ═══════════ */
+function renderP(){
+  const w=document.getElementById('secP'); w.innerHTML='';
+  Object.entries(TD).forEach(([k,g])=>{
+    const custom=(extT[k]||[]).filter(i=>!hid['t_'+i.id]);
+    const defItems=g.items.filter(i=>!hid['t_'+i.id]);
+    const allItems=[...defItems,...custom];
+    const n=allItems.filter(i=>doneT[i.id]).length,pct=Math.round(n/Math.max(allItems.length,1)*100);
+    const s=document.createElement('div');
+    s.className='sec '+g.th; s.id='sp'+k;
+    s.innerHTML=`<div class="sechd" onclick="tog('sp${k}')"><div class="sectl"><span class="secic">${g.ic}</span><span class="secnm">${g.lb}</span></div><div class="secrt"><div class="minibb"><div class="minibf" style="width:${pct}%"></div></div><span class="bdg">${n}/${allItems.length}</span><span class="chv">▼</span></div></div><div class="secbd" id="sb${k}"></div>`;
+    w.appendChild(s);
+    const b=document.getElementById('sb'+k);
+    // default items
+    defItems.forEach(t=>{
+      const dn=!!doneT[t.id]; const d=document.createElement('div');
+      d.className='itm'+(dn?' dn':'');
+      d.innerHTML=`<div class="chk">${dn?'✓':''}</div><div class="itxt">${t.tx}</div><div class="iactions"><button class="iact edit" onclick="editDefTask(event,'${k}','${t.id}',\`${t.tx.replace(/`/g,"'")}\`)" title="Editar">✏</button><button class="iact" onclick="hideItem(event,'t_${t.id}')" title="Excluir">🗑</button></div>`;
+      d.querySelector('.chk').onclick=e=>{e.stopPropagation();toggleT(t.id);};
+      d.querySelector('.itxt').onclick=e=>{e.stopPropagation();toggleT(t.id);};
+      b.appendChild(d);
+    });
+    // custom items
+    custom.forEach(t=>{
+      const dn=!!doneT[t.id]; const d=document.createElement('div');
+      d.className='itm'+(dn?' dn':'');
+      d.innerHTML=`<div class="chk">${dn?'✓':''}</div><div class="itxt">${t.tx}</div><div class="iactions"><button class="iact edit" onclick="editCustomTask(event,'${k}','${t.id}',\`${(t.tx||'').replace(/`/g,"'")}\`)" title="Editar">✏</button><button class="iact" onclick="deleteCustomTask(event,'${k}','${t.id}')" title="Excluir">🗑</button></div>`;
+      d.querySelector('.chk').onclick=e=>{e.stopPropagation();toggleT(t.id);};
+      d.querySelector('.itxt').onclick=e=>{e.stopPropagation();toggleT(t.id);};
+      b.appendChild(d);
+    });
+    // add button
+    const addBtn=document.createElement('button');
+    addBtn.className='add-trigger'; addBtn.innerHTML='<span class="plus">＋</span> Adicionar pendência';
+    addBtn.onclick=()=>showAddTask(k,b,addBtn);
+    b.appendChild(addBtn);
+  });
+  upP();
+}
+function toggleT(id){doneT[id]=!doneT[id];saveAll();renderP();}
+function editDefTask(e,sec,id,oldTx){e.stopPropagation();openModal('Editar pendência',oldTx,'',false,(tx)=>{if(!extT[sec])extT[sec]=[];extT[sec]=extT[sec].filter(i=>i.id!==id);if(!hid)hid={};hid['t_orig_'+id]=oldTx;// store edit in custom with same effective ID
+const newId='e_'+id; extT[sec]=[...extT[sec],{id:newId,tx}];hid['t_'+id]=true;doneT[newId]=doneT[id]||false;delete doneT[id];saveAll();renderP();});}
+function editCustomTask(e,sec,id,oldTx){e.stopPropagation();openModal('Editar pendência',oldTx,'',false,(tx)=>{if(extT[sec]){const i=extT[sec].find(x=>x.id===id);if(i)i.tx=tx;}saveAll();renderP();});}
+function hideItem(e,hidKey){e.stopPropagation();if(!confirm('Excluir este item?'))return;hid[hidKey]=true;saveAll();renderP();renderC();}
+function deleteCustomTask(e,sec,id){e.stopPropagation();if(!confirm('Excluir este item?'))return;if(extT[sec])extT[sec]=extT[sec].filter(i=>i.id!==id);delete doneT[id];saveAll();renderP();}
+function showAddTask(sec,body,addBtn){
+  if(body.querySelector('.add-form'))return;
+  const f=document.createElement('div'); f.className='add-form';
+  f.innerHTML=`<input class="main-in" id="atx_${sec}" placeholder="Descrição da pendência…"><div class="add-row-btns"><button class="add-cancel" onclick="this.closest('.add-form').remove()">Cancelar</button><button class="add-ok" onclick="doAddTask('${sec}')">Adicionar</button></div>`;
+  body.insertBefore(f,addBtn);
+  f.querySelector('input').focus();
+}
+function doAddTask(sec){
+  const inp=document.getElementById('atx_'+sec); const tx=inp.value.trim();
+  if(!tx)return; const id='cx'+Date.now();
+  if(!extT[sec])extT[sec]=[];
+  extT[sec].push({id,tx}); doneT[id]=false;
+  saveAll(); renderP();
+}
+function upP(){const all=getAllTaskItems(),n=all.filter(i=>doneT[i.id]).length,pct=Math.round(n/Math.max(all.length,1)*100);document.getElementById('pBar').style.width=pct+'%';document.getElementById('pPct').textContent=pct+'%';document.getElementById('celP').classList.toggle('on',n>0&&n===all.length);}
+function getAllTaskItems(){return Object.entries(TD).flatMap(([k,g])=>[...g.items.filter(i=>!hid['t_'+i.id]),...(extT[k]||[]).filter(i=>!hid['t_'+i.id])]);}
+
+/* ═══════════ RENDER COMPRAS ═══════════ */
+function renderC(){
+  const w=document.getElementById('secC'); w.innerHTML='';
+  SD.forEach(cat=>{
+    const defItems=cat.items||cat.sub.flatMap(s=>s.items);
+    const visDefItems=defItems.filter(i=>!hid['s_'+i.id]);
+    const customItems=(extS[cat.id]||[]).filter(i=>!hid['s_'+i.id]);
+    const allItems=[...visDefItems,...customItems];
+    const n=allItems.filter(i=>doneS[i.id]).length,pct=Math.round(n/Math.max(allItems.length,1)*100);
+    const s=document.createElement('div');
+    s.className='sec '+cat.th; s.id='sc'+cat.id;
+    s.innerHTML=`<div class="sechd" onclick="tog('sc${cat.id}')"><div class="sectl"><span class="secic">${cat.ic}</span><span class="secnm">${cat.lb}</span></div><div class="secrt"><div class="minibb"><div class="minibf" style="width:${pct}%"></div></div><span class="bdg">${n}/${allItems.length}</span><span class="chv">▼</span></div></div><div class="secbd" id="sb${cat.id}"></div>`;
+    w.appendChild(s);
+    const b=document.getElementById('sb'+cat.id);
+    const addI=(item,isCustom)=>{
+      const dn=!!doneS[item.id]; const d=document.createElement('div');
+      d.className='itm'+(dn?' dn':'');
+      const editFn=isCustom?`editCustomShop(event,'${cat.id}','${item.id}',\`${(item.nm||'').replace(/`/g,"'")}\`,\`${(item.qt||'').replace(/`/g,"'")}\`)`:`editDefShop(event,'${cat.id}','${item.id}',\`${(item.nm||'').replace(/`/g,"'")}\`,\`${(item.qt||'').replace(/`/g,"'")}\`)`;
+      const delFn=isCustom?`deleteCustomShop(event,'${cat.id}','${item.id}')`:`hideItem(event,'s_${item.id}')`;
+      d.innerHTML=`<div class="chk">${dn?'✓':''}</div><div class="iinf"><div class="inm">${item.nm}</div><div class="imeta"><span class="iqty">${item.qt||''}</span>${item.nt?`<span class="inote">${item.nt}</span>`:''}</div></div><div class="iactions"><button class="iact edit" onclick="${editFn}" title="Editar">✏</button><button class="iact" onclick="${delFn}" title="Excluir">🗑</button></div>`;
+      d.querySelector('.chk').onclick=e=>{e.stopPropagation();toggleS(item.id);};
+      d.querySelector('.inm').onclick=e=>{e.stopPropagation();toggleS(item.id);};
+      b.appendChild(d);
+    };
+    if(cat.sub){
+      cat.sub.forEach(sub=>{
+        const visSubItems=sub.items.filter(i=>!hid['s_'+i.id]);
+        if(visSubItems.length){const sh=document.createElement('div');sh.className='subhd';sh.textContent=sub.sb;b.appendChild(sh);visSubItems.forEach(i=>addI(i,false));}
+      });
+    } else {
+      visDefItems.forEach(i=>addI(i,false));
+    }
+    customItems.forEach(i=>addI(i,true));
+    // add button
+    const addBtn=document.createElement('button');
+    addBtn.className='add-trigger'; addBtn.innerHTML='<span class="plus">＋</span> Adicionar item';
+    addBtn.onclick=()=>showAddShop(cat.id,b,addBtn);
+    b.appendChild(addBtn);
+  });
+  upC();
+}
+function toggleS(id){doneS[id]=!doneS[id];saveAll();renderC();}
+function editDefShop(e,catId,id,oldNm,oldQt){e.stopPropagation();openModal('Editar item',oldNm,oldQt,true,(nm,qt)=>{const newId='e_'+id;if(!extS[catId])extS[catId]=[];extS[catId]=extS[catId].filter(i=>i.id!==newId);extS[catId].push({id:newId,nm,qt:qt||oldQt,nt:''});hid['s_'+id]=true;doneS[newId]=doneS[id]||false;delete doneS[id];saveAll();renderC();});}
+function editCustomShop(e,catId,id,oldNm,oldQt){e.stopPropagation();openModal('Editar item',oldNm,oldQt,true,(nm,qt)=>{if(extS[catId]){const i=extS[catId].find(x=>x.id===id);if(i){i.nm=nm;if(qt)i.qt=qt;}}saveAll();renderC();});}
+function deleteCustomShop(e,catId,id){e.stopPropagation();if(!confirm('Excluir este item?'))return;if(extS[catId])extS[catId]=extS[catId].filter(i=>i.id!==id);delete doneS[id];saveAll();renderC();}
+function showAddShop(catId,body,addBtn){
+  if(body.querySelector('.add-form'))return;
+  const f=document.createElement('div'); f.className='add-form';
+  f.innerHTML=`<div class="add-form-row"><input class="main-in" id="anm_${catId}" placeholder="Nome do item…"><input class="qty-in" id="aqt_${catId}" placeholder="Qtde"></div><div class="add-row-btns"><button class="add-cancel" onclick="this.closest('.add-form').remove()">Cancelar</button><button class="add-ok" onclick="doAddShop('${catId}')">Adicionar</button></div>`;
+  body.insertBefore(f,addBtn);
+  f.querySelector('input').focus();
+}
+function doAddShop(catId){
+  const nm=document.getElementById('anm_'+catId).value.trim();
+  const qt=document.getElementById('aqt_'+catId).value.trim();
+  if(!nm)return; const id='cx'+Date.now();
+  if(!extS[catId])extS[catId]=[];
+  extS[catId].push({id,nm,qt:qt||'—',nt:''}); doneS[id]=false;
+  saveAll(); renderC();
+}
+function upC(){const all=getAllShopItems(),n=all.filter(i=>doneS[i.id]).length,pct=Math.round(n/Math.max(all.length,1)*100);document.getElementById('cBar').style.width=pct+'%';document.getElementById('cPct').textContent=pct+'%';document.getElementById('celC').classList.toggle('on',n>0&&n===all.length);}
+function getAllShopItems(){return SD.flatMap(c=>[...(c.items||c.sub.flatMap(s=>s.items)).filter(i=>!hid['s_'+i.id]),...(extS[c.id]||[]).filter(i=>!hid['s_'+i.id])]);}
+
+/* ═══════════ MODAL ═══════════ */
+function openModal(title,text,qty,showQty,cb){
+  document.getElementById('modalTitle').textContent=title;
+  document.getElementById('modalText').value=text;
+  const qtyInput=document.getElementById('modalQty');
+  qtyInput.style.display=showQty?'block':'none';
+  qtyInput.value=qty||'';
+  modalCb=cb;
+  document.getElementById('editModal').classList.add('on');
+  setTimeout(()=>document.getElementById('modalText').focus(),100);
+}
+function closeModal(){document.getElementById('editModal').classList.remove('on');modalCb=null;}
+function saveModal(){
+  const tx=document.getElementById('modalText').value.trim();
+  const qt=document.getElementById('modalQty').value.trim();
+  if(!tx){alert('O texto não pode estar vazio.');return;}
+  if(modalCb) modalCb(tx,qt);
+  closeModal();
+}
+document.getElementById('editModal').addEventListener('click',function(e){if(e.target===this)closeModal();});
+
+/* ═══════════ RENDER GENÉRICO (Não Esquecer + Viagem) ═══════════ */
+function renderChecklist(DATA,doneState,extState,prefix,containerId){
+  const w=document.getElementById(containerId); w.innerHTML='';
+  DATA.forEach(g=>{
+    const custom=(extState[g.id]||[]).filter(i=>!hid[prefix+'_'+i.id]);
+    const defItems=g.items.filter(i=>!hid[prefix+'_'+i.id]);
+    const allItems=[...defItems,...custom];
+    const n=allItems.filter(i=>doneState[i.id]).length,pct=Math.round(n/Math.max(allItems.length,1)*100);
+    const s=document.createElement('div');
+    s.className='sec '+g.th; s.id='s'+prefix+g.id;
+    s.innerHTML=`<div class="sechd" onclick="tog('s${prefix}${g.id}')"><div class="sectl"><span class="secic">${g.ic}</span><span class="secnm">${g.lb}</span></div><div class="secrt"><div class="minibb"><div class="minibf" style="width:${pct}%"></div></div><span class="bdg">${n}/${allItems.length}</span><span class="chv">▼</span></div></div><div class="secbd" id="sb${prefix}${g.id}"></div>`;
+    w.appendChild(s);
+    const b=document.getElementById('sb'+prefix+g.id);
+    defItems.forEach(t=>{
+      const dn=!!doneState[t.id]; const d=document.createElement('div');
+      d.className='itm'+(dn?' dn':'');
+      d.innerHTML=`<div class="chk">${dn?'✓':''}</div><div class="itxt">${t.tx}</div><div class="iactions"><button class="iact edit" onclick="editDefCL(event,'${prefix}','${g.id}','${t.id}',\`${t.tx.replace(/`/g,"'")}\`)" title="Editar">✏</button><button class="iact" onclick="hideCL(event,'${prefix}','${t.id}')" title="Excluir">🗑</button></div>`;
+      d.querySelector('.chk').onclick=e=>{e.stopPropagation();toggleCL(t.id,prefix);};
+      d.querySelector('.itxt').onclick=e=>{e.stopPropagation();toggleCL(t.id,prefix);};
+      b.appendChild(d);
+    });
+    custom.forEach(t=>{
+      const dn=!!doneState[t.id]; const d=document.createElement('div');
+      d.className='itm'+(dn?' dn':'');
+      d.innerHTML=`<div class="chk">${dn?'✓':''}</div><div class="itxt">${t.tx}</div><div class="iactions"><button class="iact edit" onclick="editCustCL(event,'${prefix}','${g.id}','${t.id}',\`${t.tx.replace(/`/g,"'")}\`)" title="Editar">✏</button><button class="iact" onclick="delCustCL(event,'${prefix}','${g.id}','${t.id}')" title="Excluir">🗑</button></div>`;
+      d.querySelector('.chk').onclick=e=>{e.stopPropagation();toggleCL(t.id,prefix);};
+      d.querySelector('.itxt').onclick=e=>{e.stopPropagation();toggleCL(t.id,prefix);};
+      b.appendChild(d);
+    });
+    const addBtn=document.createElement('button');
+    addBtn.className='add-trigger'; addBtn.innerHTML='<span class="plus">＋</span> Adicionar item';
+    addBtn.onclick=()=>showAddCL(prefix,g.id,b,addBtn);
+    b.appendChild(addBtn);
+  });
+}
+function renderNE(){
+  renderChecklist(NE_DATA,doneNE,extNE,'ne','secNE');
+  const all=NE_DATA.flatMap(g=>[...g.items.filter(i=>!hid['ne_'+i.id]),...(extNE[g.id]||[]).filter(i=>!hid['ne_'+i.id])]);
+  const n=all.filter(i=>doneNE[i.id]).length,pct=Math.round(n/Math.max(all.length,1)*100);
+  const b=document.getElementById('neBar');if(b)b.style.width=pct+'%';
+  const p=document.getElementById('nePct');if(p)p.textContent=pct+'%';
+}
+function renderTR(){
+  renderChecklist(TRV_DATA,doneTR,extTR,'tr','secTR');
+  const all=TRV_DATA.flatMap(g=>[...g.items.filter(i=>!hid['tr_'+i.id]),...(extTR[g.id]||[]).filter(i=>!hid['tr_'+i.id])]);
+  const n=all.filter(i=>doneTR[i.id]).length,pct=Math.round(n/Math.max(all.length,1)*100);
+  const b=document.getElementById('trBar');if(b)b.style.width=pct+'%';
+  const p=document.getElementById('trPct');if(p)p.textContent=pct+'%';
+}
+
+function toggleCL(id,prefix){
+  if(prefix==='ne'){doneNE[id]=!doneNE[id];}else{doneTR[id]=!doneTR[id];}
+  saveAll(); if(prefix==='ne')renderNE();else renderTR();
+}
+function hideCL(e,prefix,id){
+  e.stopPropagation();if(!confirm('Excluir este item?'))return;
+  hid[prefix+'_'+id]=true; saveAll(); if(prefix==='ne')renderNE();else renderTR();
+}
+function editDefCL(e,prefix,grpId,id,oldTx){
+  e.stopPropagation();
+  openModal('Editar item',oldTx,'',false,(tx)=>{
+    const ext=prefix==='ne'?extNE:extTR;
+    const done=prefix==='ne'?doneNE:doneTR;
+    const newId='e'+prefix+'_'+id;
+    if(!ext[grpId])ext[grpId]=[];
+    ext[grpId]=ext[grpId].filter(i=>i.id!==newId);
+    ext[grpId].push({id:newId,tx});
+    hid[prefix+'_'+id]=true; done[newId]=done[id]||false; delete done[id];
+    saveAll(); if(prefix==='ne')renderNE();else renderTR();
+  });
+}
+function editCustCL(e,prefix,grpId,id,oldTx){
+  e.stopPropagation();
+  openModal('Editar item',oldTx,'',false,(tx)=>{
+    const ext=prefix==='ne'?extNE:extTR;
+    if(ext[grpId]){const i=ext[grpId].find(x=>x.id===id);if(i)i.tx=tx;}
+    saveAll(); if(prefix==='ne')renderNE();else renderTR();
+  });
+}
+function delCustCL(e,prefix,grpId,id){
+  e.stopPropagation();if(!confirm('Excluir este item?'))return;
+  const ext=prefix==='ne'?extNE:extTR;
+  const done=prefix==='ne'?doneNE:doneTR;
+  if(ext[grpId])ext[grpId]=ext[grpId].filter(i=>i.id!==id);
+  delete done[id]; saveAll(); if(prefix==='ne')renderNE();else renderTR();
+}
+function showAddCL(prefix,grpId,body,addBtn){
+  if(body.querySelector('.add-form'))return;
+  const f=document.createElement('div'); f.className='add-form';
+  f.innerHTML=`<div class="add-form-row"><input class="main-in" id="acl_${prefix}_${grpId}" placeholder="Novo item…"></div><div class="add-row-btns"><button class="add-cancel" onclick="this.closest('.add-form').remove()">Cancelar</button><button class="add-ok" onclick="doAddCL('${prefix}','${grpId}')">Adicionar</button></div>`;
+  body.insertBefore(f,addBtn); f.querySelector('input').focus();
+}
+function doAddCL(prefix,grpId){
+  const nm=document.getElementById('acl_'+prefix+'_'+grpId).value.trim();
+  if(!nm)return; const id=prefix+'x'+Date.now();
+  const ext=prefix==='ne'?extNE:extTR;
+  const done=prefix==='ne'?doneNE:doneTR;
+  if(!ext[grpId])ext[grpId]=[];
+  ext[grpId].push({id,tx:nm}); done[id]=false;
+  saveAll(); if(prefix==='ne')renderNE();else renderTR();
+}
+
+/* ═══════════ NAV ═══════════ */
+/* Para adicionar nova aba: 1) adicione botão no HTML com id="nb-x" e onclick="goTab('x')"
+   2) adicione div com id="tab-x" no HTML  3) adicione 'x' no array abaixo  4) crie renderX() */
+function goTab(t){['p','c','f','n','v'].forEach(x=>{document.getElementById('tab-'+x).classList.toggle('on',x===t);document.getElementById('nb-'+x).classList.toggle('on',x===t);});window.scrollTo(0,0);}
+function tog(id){document.getElementById(id).classList.toggle('cls');}
+function resetTasks(){if(!confirm('Redefinir todas as pendências? Itens personalizados serão mantidos.'))return;doneT=defTasks();saveAll();renderP();}
+function resetShop(){if(!confirm('Redefinir lista de compras?'))return;doneS={};saveAll();renderC();}
+function tick(){const diff=new Date('2026-06-13T15:30:00-03:00')-new Date();const el=document.getElementById('cdown');if(!el)return;if(diff<=0){el.textContent='🎉 O grande dia chegou!';return;}const d=Math.floor(diff/86400000),h=Math.floor(diff%86400000/3600000),m=Math.floor(diff%3600000/60000);el.innerHTML=`⏳ Faltam <strong>${d}</strong> dias, ${h}h${String(m).padStart(2,'0')}min para o casamento`;}
+</script>
+</body>
+</html>
